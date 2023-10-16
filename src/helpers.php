@@ -2,8 +2,6 @@
 
 namespace Php;
 
-use ArrayObject;
-
 if (!function_exists('array_reduce')) {
     function array_reduce(array $array, callable $callback, $initial = null)
     {
@@ -37,26 +35,19 @@ if (!function_exists('str_camel')) {
 }
 
 if (!function_exists('array_object')) {
-    function array_object(
-        iterable $array,
-        $options = ArrayObject::ARRAY_AS_PROPS | ArrayObject::STD_PROP_LIST
-    ): ArrayObject {
-        foreach ($array as $key => $entry){
-            if (is_iterable($entry)) {
-                $array[$key] = array_object($entry, $options);
+    /**
+     * @param iterable $entries
+     *
+     * @return ArrayObject | \stdClass
+     */
+    function array_object(iterable $entries = [], int $options = ArrayObject::ARRAY_AS_PROPS | ArrayObject::STD_PROP_LIST): ArrayObject
+    {
+        foreach ($entries as $key => $entry) {
+            if (is_array($entry)) {
+                $entries[$key] = array_object($entry, $options);
             }
         }
 
-        return new class ($array, $options) extends ArrayObject {
-            public function toArray()
-            {
-                $array = [];
-                foreach ($this->getArrayCopy() as $key => $value) {
-                    $array[$key] = $value instanceof self ? $value->toArray() : $value;
-                }
-
-                return $array;
-            }
-        };
+        return new ArrayObject($entries, $options);
     }
 }
