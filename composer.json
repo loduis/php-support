@@ -8,6 +8,9 @@
     ],
     "license": "MIT",
     "autoload": {
+        "psr-4": {
+            "Php\\": "src/"
+        },
         "files": [
             "src/helpers.php"
         ]
