@@ -51,3 +51,15 @@ if (!function_exists('array_object')) {
         return new ArrayObject($entries, $options);
     }
 }
+
+if (!function_exists('number_pad')) {
+    function number_pad($value, int $num = 2): string
+    {
+        return str_pad(
+            (string) $value,
+            $num,
+            '0',
+            STR_PAD_LEFT
+        );
+    }
+}
