@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Php;
 
-class ArrayObject extends \ArrayObject implements \JsonSerializable
+class ArrayObject extends \ArrayObject implements \JsonSerializable, Arrayable
 {
     public function toArray(): array
     {
