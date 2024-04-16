@@ -112,7 +112,7 @@ if (!function_exists('str_camel')) {
 
 if (!function_exists('str_snake')) {
 
-    function snake(string $value, string $delimiter = '_')
+    function str_snake(string $value, string $delimiter = '_')
     {
         static $cache = [];
         $key = $value;
