@@ -15,5 +15,10 @@
             "src/helpers.php"
         ]
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.x-dev"
+        }
+    }
 }
