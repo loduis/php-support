@@ -24,13 +24,15 @@ if (!function_exists('array_pull')) {
     }
 }
 
-if (!function_exists('str_camel')) {
-    function str_camel(string $value): string
-    {
-        $value = ucwords(str_replace(['-', '_'], ' ', $value));
-        $value = str_replace(' ', '', $value);
+if (!function_exists('array_key_exists')) {
 
-        return lcfirst($value);
+    function array_key_exists(iterable $array, $key)
+    {
+        if ($array instanceof \ArrayAccess) {
+            return $array->offsetExists($key);
+        }
+
+        return \array_key_exists($key, (array) $array);
     }
 }
 
@@ -49,6 +51,86 @@ if (!function_exists('array_object')) {
         }
 
         return new ArrayObject($entries, $options);
+    }
+}
+
+if (!function_exists('is_array')) {
+    function is_array($value) {
+        return \is_array($value) || $value instanceof \ArrayAccess;
+    }
+}
+
+if (!function_exists('array_has')) {
+
+    function array_has($array, ...$keys)
+    {
+        if (! $array || $keys === []) {
+            return false;
+        }
+
+        foreach ($keys as $key) {
+            $subKeyArray = $array;
+
+            if (array_key_exists($array, $key)) {
+                continue;
+            }
+
+            foreach (explode('.', $key) as $segment) {
+                if (is_array($subKeyArray) && array_key_exists($subKeyArray, $segment)) {
+                    $subKeyArray = $subKeyArray[$segment];
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+}
+
+if (!function_exists('str_camel')) {
+
+    function str_camel(string $value): string
+    {
+        static $cache = [];
+
+        if (isset($cache[$value])) {
+            return $cache[$value];
+        }
+
+        return $cache[$value] = lcfirst(
+            str_replace(
+                ' ',
+                '',
+                ucwords(
+                    str_replace(['-', '_'], ' ', $value)
+                )
+            )
+        );
+    }
+}
+
+if (!function_exists('str_snake')) {
+
+    function snake(string $value, string $delimiter = '_')
+    {
+        static $cache = [];
+        $key = $value;
+
+        if (isset($cache[$key][$delimiter])) {
+            return $cache[$key][$delimiter];
+        }
+
+        if (! ctype_lower($value)) {
+            $value = preg_replace('/\s+/u', '', ucwords($value));
+
+            $value = mb_strtolower(
+                preg_replace('/(.)(?=[A-Z])/u', '$1'.$delimiter, $value),
+                'UTF-8'
+            );
+        }
+
+        return $cache[$key][$delimiter] = $value;
     }
 }
 
