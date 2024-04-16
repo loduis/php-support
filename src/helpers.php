@@ -2,7 +2,7 @@
 
 namespace Php;
 
-if (!function_exists('array_reduce')) {
+if (!function_exists(__NAMESPACE__ . '\array_reduce')) {
     function array_reduce(array $array, callable $callback, $initial = null)
     {
         $acc = $initial;
@@ -24,8 +24,7 @@ if (!function_exists('array_pull')) {
     }
 }
 
-if (!function_exists('array_key_exists')) {
-
+if (!function_exists(__NAMESPACE__ . '\array_key_exists')) {
     function array_key_exists(iterable $array, $key)
     {
         if ($array instanceof \ArrayAccess) {
@@ -54,7 +53,7 @@ if (!function_exists('array_object')) {
     }
 }
 
-if (!function_exists('is_array')) {
+if (!function_exists(__NAMESPACE__ . '\is_array')) {
     function is_array($value) {
         return \is_array($value) || $value instanceof \ArrayAccess;
     }
