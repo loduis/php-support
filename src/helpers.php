@@ -146,11 +146,12 @@ namespace Php {
 }
 
 namespace {
+    if (!function_exists('array_is_list')) {
+        function array_is_list(array $array)
+        {
+            $keys = array_keys($array);
 
-    function array_is_list(array $array)
-    {
-        $keys = array_keys($array);
-
-        return array_keys($keys) === $keys;
+            return array_keys($keys) === $keys;
+        }
     }
 }
