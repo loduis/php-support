@@ -58,7 +58,7 @@ namespace Php {
         }
     }
 
-    if (!function_exists('array_has')) {
+    if (!function_exists(__NAMESPACE__ . '\array_has')) {
 
         function array_has($array, ...$keys)
         {
