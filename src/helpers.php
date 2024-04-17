@@ -13,7 +13,7 @@ namespace Php {
         }
     }
 
-    if (!function_exists('array_pull')) {
+    if (!function_exists(__NAMESPACE__ . '\array_pull')) {
         function array_pull(array &$array, string $key, $default = null)
         {
             $value = $array[$key] ?? $default;
@@ -34,7 +34,7 @@ namespace Php {
         }
     }
 
-    if (!function_exists('array_object')) {
+    if (!function_exists(__NAMESPACE__ . '\array_object')) {
         /**
          * @param iterable $entries
          *
@@ -86,7 +86,7 @@ namespace Php {
         }
     }
 
-    if (!function_exists('str_camel')) {
+    if (!function_exists(__NAMESPACE__ . '\str_camel')) {
 
         function str_camel(string $value): string
         {
@@ -108,7 +108,7 @@ namespace Php {
         }
     }
 
-    if (!function_exists('str_snake')) {
+    if (!function_exists(__NAMESPACE__ . '\str_snake')) {
 
         function str_snake(string $value, string $delimiter = '_')
         {
@@ -132,7 +132,7 @@ namespace Php {
         }
     }
 
-    if (!function_exists('number_pad')) {
+    if (!function_exists(__NAMESPACE__ . '\number_pad')) {
         function number_pad($value, int $num = 2): string
         {
             return str_pad(
