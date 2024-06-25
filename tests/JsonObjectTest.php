@@ -9,6 +9,8 @@ use Php\JsonObject;
 class TestObject3 extends JsonObject
 {
     public string $name;
+
+    public ?string $tradename;
 }
 
 class JsonObjectTest extends TestCase
@@ -36,5 +38,12 @@ class JsonObjectTest extends TestCase
     {
         $this->object->name = 'Lucas';
         $this->assertEquals('{"name":"Lucas"}', $this->object->toJson());
+    }
+
+    public function testToJson2()
+    {
+        $this->object->name = 'Lucas';
+        $this->object->tradename = null;
+        $this->assertEquals('{"name":"Lucas","tradename":null}', $this->object->toJson());
     }
 }

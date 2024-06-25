@@ -96,12 +96,19 @@ abstract class FluentObject implements ArrayAccess, Arrayable
     public function toArray(): iterable
     {
         $array = [];
-        foreach ($this as $key => $value) {
-            $property = ReflectionCache::getProperty(static::class, $key);
-            if (!$property->isPrivate()) {
-                $value = $this->getPropertyValue($key, $value);
-                $array[$key] = $value instanceof Arrayable ? $value->toArray() : $value;
+        foreach (ReflectionCache::getClass(static::class)->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED) as $property) {
+            $key = $property->name;
+            try {
+                $value = $this->$key;
+            } catch (Throwable $err) {
+                $type = $property->getType();
+                if (!$type || !($type instanceof ReflectionNamedType) || !$type->allowsNull()) {
+                    throw $err;
+                }
+                continue;
             }
+            $value = $this->getPropertyValue($key, $value);
+            $array[$key] = $value instanceof Arrayable ? $value->toArray() : $value;
         }
 
         return $array;

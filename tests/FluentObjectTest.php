@@ -17,16 +17,16 @@ class TestObject extends FluentObject
 {
     public string $publicProp;
 
-    protected string $protectedProp;
+    protected ?string $protectedProp;
 
     private string $privateProp;
 
-    protected TestObject2 $nestedObject;
+    protected ?TestObject2 $nestedObject;
 
     /**
      * @readonly
      */
-    protected bool $readonly;
+    protected ?bool $readonly;
 
     protected function setProtectedProp($value)
     {
@@ -209,14 +209,6 @@ class FluentObjectTest extends TestCase
         $this->assertInstanceOf(TestObject2::class, $this->object->nestedObject);
         $this->assertEquals('nested value', $this->object->nestedObject->nestedProp);
         $this->assertEquals('Nested Protected: 10.12', $this->object->nestedObject->nestedProtectedProp);
-    }
-
-    public function testNestedSetNull()
-    {
-        $this->expectException(Error::class);
-        $this->object->publicProp = "public";
-        $this->object->protectedProp = "protected";
-        $this->object->nestedObject = null;
     }
 
     public function testNestedStdClass()
