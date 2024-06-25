@@ -22,7 +22,9 @@ abstract class FluentObject implements ArrayAccess, Arrayable
     {
         foreach ($properties as $property => $value) {
             $this->$property = $this->setPropertyValue(
-                ReflectionCache::getProperty(static::class, $property), $value
+                ReflectionCache::getProperty(static::class, $property),
+                $value,
+                true
             );
         }
 
@@ -32,7 +34,7 @@ abstract class FluentObject implements ArrayAccess, Arrayable
     public function offsetSet($offset, $value): void
     {
         if (!property_exists($this, $offset)) {
-            throw new OutOfBoundsException("Property does not exist: $offset");
+            throw new OutOfBoundsException("Property does not exist: $offset on class " . static::class);
         }
         $property = ReflectionCache::getProperty(static::class, $offset);
         if ($property->isPrivate()) {
@@ -110,9 +112,10 @@ abstract class FluentObject implements ArrayAccess, Arrayable
         return $this->toArray();
     }
 
-    private function setPropertyValue(ReflectionProperty $property, $value)
+    private function setPropertyValue(ReflectionProperty $property, $value, bool $force = false)
     {
-        $setterMethod = 'set' . ucfirst($property->getName());
+        $key = $property->getName();
+        $setterMethod = 'set' . ucfirst($key);
         if (method_exists($this, $setterMethod)) {
             $value = $this->$setterMethod($value);
         } elseif (is_iterable($value) || ($value instanceof stdClass)) {
@@ -122,6 +125,13 @@ abstract class FluentObject implements ArrayAccess, Arrayable
                 if ($className->isSubclassOf(self::class)) {
                     $value = $className->newInstance((array) $value);
                 }
+            }
+        }
+
+        if (!$force && version_compare(PHP_VERSION, '8.1.0', '<')) {
+            $comments = $property->getDocComment();
+            if ($comments && str_contains($comments, '@readonly')) {
+                throw new \LogicException("Property $key is readonly on class " . static::class);
             }
         }
 

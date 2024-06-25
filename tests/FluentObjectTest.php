@@ -3,6 +3,7 @@
 namespace Php\Tests;
 
 use Error;
+use LogicException;
 use PHPUnit\Framework\TestCase;
 use Php\FluentObject;
 use OutOfBoundsException;
@@ -22,6 +23,11 @@ class TestObject extends FluentObject
 
     protected TestObject2 $nestedObject;
 
+    /**
+     * @readonly
+     */
+    protected bool $readonly;
+
     protected function setProtectedProp($value)
     {
         return strtoupper($value);
@@ -30,6 +36,11 @@ class TestObject extends FluentObject
     protected function getProtectedProp($value)
     {
         return "Protected: " . $value;
+    }
+
+    protected function getReadonly()
+    {
+        return true;
     }
 }
 
@@ -62,6 +73,17 @@ class FluentObjectTest extends TestCase
     {
         $this->object->publicProp = "test";
         $this->assertEquals("test", $this->object->publicProp);
+    }
+
+    public function testReadonly()
+    {
+        $test = new TestObject([
+            'readonly' => false
+        ]);
+
+        $this->assertTrue($test->readonly);
+        $this->expectException(LogicException::class);
+        $test->readonly = true;
     }
 
     public function testProtectedPropertyAccess()
