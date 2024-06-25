@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Php;
 
-class ArrayObject extends \ArrayObject implements \JsonSerializable, Arrayable
+class ArrayObject extends \ArrayObject implements Arrayable, Jsonable
 {
+    use JsonTrait;
+
     public function toArray(): array
     {
         $array = [];
@@ -31,32 +33,6 @@ class ArrayObject extends \ArrayObject implements \JsonSerializable, Arrayable
         if ($this->offsetExists($index)) {
             parent::offsetUnset($index);
         }
-    }
-
-    public function __toString()
-    {
-        return $this->toJSON();
-    }
-
-    public function pretty()
-    {
-        return $this->toJSON(JSON_PRETTY_PRINT);
-    }
-
-    public function toJSON($options = 0)
-    {
-        return json_encode($this,
-            JSON_UNESCAPED_SLASHES |
-            JSON_UNESCAPED_UNICODE |
-            JSON_BIGINT_AS_STRING |
-            JSON_PRESERVE_ZERO_FRACTION |
-            $options
-        );
-    }
-
-    public function jsonSerialize()
-    {
-        return $this->toArray();
     }
 
     public function pull(string $key)

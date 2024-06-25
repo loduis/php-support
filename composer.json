@@ -7,6 +7,9 @@
         }
     ],
     "license": "MIT",
+    "require-dev": {
+        "phpunit/phpunit": "^9"
+    },
     "autoload": {
         "psr-4": {
             "Php\\": "src/"
@@ -14,6 +17,11 @@
         "files": [
             "src/helpers.php"
         ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+          "Php\\": "tests/"
+        }
     },
     "minimum-stability": "dev",
     "extra": {
