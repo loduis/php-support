@@ -125,7 +125,8 @@ abstract class FluentObject implements ArrayAccess, Arrayable
         $setterMethod = 'set' . ucfirst($key);
         if (method_exists($this, $setterMethod)) {
             $value = $this->$setterMethod($value);
-        } elseif (is_iterable($value) || ($value instanceof stdClass)) {
+        }
+        if (is_iterable($value) || ($value instanceof stdClass)) {
             $type = $property->getType();
             if ($type instanceof ReflectionNamedType) {
                 $className = ReflectionCache::getClass($type->getName());
