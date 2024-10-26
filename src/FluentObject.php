@@ -11,41 +11,59 @@ use ArrayAccess;
 use stdClass;
 use Throwable;
 
+/**
+ * @template TKey of array-key
+ * @template TValue
+ * @implements ArrayAccess<TKey,TValue>
+*/
 abstract class FluentObject implements ArrayAccess, Arrayable
 {
-    public function __construct(array $properties = [])
+    public function __construct(iterable $properties = [])
     {
         $this->syncProperties($properties);
     }
 
-    public function syncProperties(iterable $properties): static
+    public function syncProperties(iterable $properties, array $transforms = []): static
     {
+        /**
+         * @var iterable<string|int, mixed> $properties
+         * @var mixed $value
+         */
         foreach ($properties as $property => $value) {
-            $this->$property = $this->setPropertyValue(
-                ReflectionCache::getProperty(static::class, $property),
-                $value,
-                true
-            );
+            /** @var string */
+            $key = $transforms[$property] ?? $property;
+            if (is_string($property)) {
+                /** @var mixed */
+                $value = $this->setPropertyValue(
+                    ReflectionCache::getProperty(static::class, $key),
+                    $value,
+                    true
+                );
+            }
+            $this->$key = $value;
         }
 
         return $this;
     }
 
-    public function offsetSet($offset, $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
-        if (!property_exists($this, $offset)) {
-            throw new OutOfBoundsException("Property does not exist: $offset on class " . static::class);
+        if ($offset !== null && is_string($offset)) {
+            if (!property_exists($this, $offset)) {
+                throw new OutOfBoundsException("Property does not exist: $offset on class " . static::class);
+            }
+
+            $property = ReflectionCache::getProperty(static::class, $offset);
+            if ($property->isPrivate()) {
+                throw new OutOfBoundsException("Cannot access private property: $offset");
+            }
+            $this->$offset = $this->setPropertyValue($property, $value);
         }
-        $property = ReflectionCache::getProperty(static::class, $offset);
-        if ($property->isPrivate()) {
-            throw new OutOfBoundsException("Cannot access private property: $offset");
-        }
-        $this->$offset = $this->setPropertyValue($property, $value);
     }
 
-    public function offsetExists($offset): bool
+    public function offsetExists(mixed $offset): bool
     {
-        if (!property_exists($this, $offset)) {
+        if (is_string($offset) && !property_exists($this, $offset)) {
             return false;
         }
         try {
@@ -53,18 +71,31 @@ abstract class FluentObject implements ArrayAccess, Arrayable
         } catch (Throwable) {
             return false;
         }
+
+        if (!is_string($offset)) {
+            return false;
+        }
+
         return !ReflectionCache::getProperty(static::class, $offset)
             ->isPrivate();
     }
 
-    public function offsetUnset($offset): void
+    /**
+     * @param TKey $offset
+     * @return void
+     */
+    public function offsetUnset(mixed $offset): void
     {
         if ($this->offsetExists($offset)) {
             unset($this->$offset);
         }
     }
 
-    public function offsetGet($offset)
+    /**
+     * @param TKey $offset
+     * @return mixed
+     */
+    public function offsetGet(mixed $offset): mixed
     {
         if (!$this->offsetExists($offset)) {
             throw new OutOfBoundsException("Property does not exist or is private: $offset");
@@ -73,32 +104,57 @@ abstract class FluentObject implements ArrayAccess, Arrayable
         return $this->getPropertyValue($offset, $this->$offset);
     }
 
-    public function __get($key)
+    /**
+     * @param TKey $key
+     * @return mixed
+     */
+    public function __get(mixed $key): mixed
     {
         return $this->offsetGet($key);
     }
 
-    public function __set($key, $value)
+    /**
+     * @param TKey $key
+     * @param TValue $value
+     * @return void
+     */
+    public function __set(mixed $key, mixed $value): void
     {
         $this->offsetSet($key, $value);
     }
-
-    public function __isset($key)
+    /**
+     * @param TKey $key
+     * @return bool
+     */
+    public function __isset(mixed $key): bool
     {
         return $this->offsetExists($key);
     }
 
-    public function __unset($key)
+    /**
+     * @param TKey $key
+     * @return void
+     */
+    public function __unset(mixed $key): void
     {
         $this->offsetUnset($key);
     }
 
-    public function toArray(): iterable
+    /**
+     * @return (array|mixed|null)[]
+     *
+     * @psalm-return array<string, array|mixed|null>
+     */
+    public function toArray(): array
     {
         $array = [];
-        foreach (ReflectionCache::getClass(static::class)->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED) as $property) {
+        /** @var ReflectionProperty $property */
+        foreach (ReflectionCache::getProperties(static::class) as $property) {
+            /** @var string */
             $key = $property->name;
+            $value = null;
             try {
+                /** @var mixed */
                 $value = $this->$key;
             } catch (Throwable $err) {
                 $type = $property->getType();
@@ -107,23 +163,38 @@ abstract class FluentObject implements ArrayAccess, Arrayable
                 }
                 continue;
             }
-            $value = $this->getPropertyValue($key, $value);
+            /** @var mixed */
+            $value = $this->getPropertyValue($key, $value, $property);
+            $key = $this->getKey($key, $property);
+            /** @var mixed */
             $array[$key] = $value instanceof Arrayable ? $value->toArray() : $value;
         }
 
         return $array;
     }
 
-    public function __debugInfo()
+    public function __debugInfo(): array
     {
         return $this->toArray();
     }
 
-    private function setPropertyValue(ReflectionProperty $property, $value, bool $force = false)
+    protected function getKey(string $key, ?ReflectionProperty $property = null): string
+    {
+        return $key;
+    }
+
+    /**
+     * @param ReflectionProperty $property
+     * @param mixed $value
+     * @param boolean $force
+     * @return mixed
+     */
+    private function setPropertyValue(ReflectionProperty $property, mixed $value, bool $force = false): mixed
     {
         $key = $property->getName();
         $setterMethod = 'set' . ucfirst($key);
         if (method_exists($this, $setterMethod)) {
+            /** @psalm-suppress MixedAssignment */
             $value = $this->$setterMethod($value);
         }
         if (is_iterable($value) || ($value instanceof stdClass)) {
@@ -138,7 +209,7 @@ abstract class FluentObject implements ArrayAccess, Arrayable
 
         if (!$force && version_compare(PHP_VERSION, '8.1.0', '<')) {
             $comments = $property->getDocComment();
-            if ($comments && str_contains($comments, '@readonly')) {
+            if ((string) ($comments) !== '' && str_contains($comments, '@readonly')) {
                 throw new \LogicException("Property $key is readonly on class " . static::class);
             }
         }
@@ -146,11 +217,18 @@ abstract class FluentObject implements ArrayAccess, Arrayable
         return $value;
     }
 
-    private function getPropertyValue(string $name, $value)
+    /**
+     * @param mixed $name
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function getPropertyValue(mixed $name, mixed $value, ?ReflectionProperty $property = null): mixed
     {
-        $getterMethod = 'get' . ucfirst($name);
-        if (method_exists($this, $getterMethod)) {
-            return $this->$getterMethod($value);
+        if (is_string($name)) {
+            $getterMethod = 'get' . ucfirst($name);
+            if (method_exists($this, $getterMethod)) {
+                return $this->$getterMethod($value);
+            }
         }
 
         return $value;

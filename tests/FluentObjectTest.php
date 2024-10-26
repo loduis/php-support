@@ -2,13 +2,14 @@
 
 namespace Php\Tests;
 
-use Error;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use Php\FluentObject;
 use OutOfBoundsException;
 use ReflectionProperty;
 use stdClass;
+use Php\Attribute\Transform;
+use Php\Attribute\TransformTrait;
 
 /**
  * @property TestObject2 $nestedObject
@@ -60,6 +61,26 @@ class TestObject2 extends FluentObject
     }
 }
 
+class TestTransform extends FluentObject
+{
+    use TransformTrait;
+
+    #[Transform('dash')]
+    public $lastName;
+
+    #[Transform('snake')]
+    public $firstName;
+
+    #[Transform('lower')]
+    public $middleNames;
+
+    #[Transform('upper')]
+    public $address;
+
+    #[Transform('camel')]
+    public $email_address;
+}
+
 class FluentObjectTest extends TestCase
 {
     private TestObject $object;
@@ -67,6 +88,36 @@ class FluentObjectTest extends TestCase
     protected function setUp(): void
     {
         $this->object = new TestObject();
+    }
+
+    public function testTransform()
+    {
+        $ob = new TestTransform();
+        $ob->lastName = 'Lucas';
+        $ob->firstName = 'Martinez';
+        $ob->middleNames = 'Antonio';
+        $ob->address = 'main';
+        $ob->email_address = 'test@gmail.com';
+        $data = $ob->toArray();
+        $this->assertArrayHasKey('last-name', $data);
+        $this->assertArrayHasKey('first_name', $data);
+        $this->assertArrayHasKey('middlenames', $data);
+        $this->assertArrayHasKey('ADDRESS', $data);
+        $this->assertArrayHasKey('emailAddress', $data);
+
+        $ob2 = new TestTransform([
+            'last-name' => 'Lucas',
+            'first_name' => 'Martinez',
+            'middlenames' => 'Antonio',
+            'ADDRESS' => 'main',
+            'emailAddress' => 'test@gmail.com',
+        ]);
+
+        $this->assertObjectHasProperty('lastName', $ob2);
+        $this->assertObjectHasProperty('firstName', $ob2);
+        $this->assertObjectHasProperty('middleNames', $ob2);
+        $this->assertObjectHasProperty('address', $ob2);
+        $this->assertObjectHasProperty('email_address', $ob2);
     }
 
     public function testPublicPropertyAccess()

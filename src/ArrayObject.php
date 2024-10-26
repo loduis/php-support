@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Php;
 
+/**
+ * @template TKey of array-key
+ * @template TValue
+ * @extends \ArrayObject<TKey,TValue>
+ */
 class ArrayObject extends \ArrayObject implements Arrayable, Jsonable
 {
     use JsonTrait;
@@ -12,6 +17,7 @@ class ArrayObject extends \ArrayObject implements Arrayable, Jsonable
     {
         $array = [];
         foreach ($this->getArrayCopy() as $key => $value) {
+            /** @disregard P1013 */
             $array[$key] = $value instanceof static ? $value->toArray() : $value;
         }
 
@@ -23,19 +29,24 @@ class ArrayObject extends \ArrayObject implements Arrayable, Jsonable
         return $this->toArray();
     }
 
-    public function offsetGet($index)
+    public function offsetGet(mixed $index): mixed
     {
         return $this->offsetExists($index) ? parent::offsetGet($index) : null;
     }
 
-    public function offsetUnset($index): void
+    public function offsetUnset(mixed $index): void
     {
         if ($this->offsetExists($index)) {
             parent::offsetUnset($index);
         }
     }
 
-    public function pull(string $key)
+    /**
+     *
+     * @param TKey $key
+     * @return mixed
+     */
+    public function pull(string $key): mixed
     {
         if (!$this->offsetExists($key)) {
             return null;
@@ -46,12 +57,15 @@ class ArrayObject extends \ArrayObject implements Arrayable, Jsonable
         return $value;
     }
 
-    public function all(array $params)
+    public function all(array $params): array
     {
         $count = count($params);
         $res = [];
         foreach ($this as $entry) {
             $exact = 0;;
+            /** @var TKey $key
+              * @var TValue $value
+              */
             foreach ($params as $key => $value) {
                 if ($value != $entry->$key) {
                     break;
@@ -66,11 +80,14 @@ class ArrayObject extends \ArrayObject implements Arrayable, Jsonable
         return $res;
     }
 
-    public function find(array $params)
+    public function find(array $params): mixed
     {
         $count = count($params);
         foreach ($this as $entry) {
             $exact = 0;;
+            /** @var TKey $key
+              * @var TValue $value
+              */
             foreach ($params as $key => $value) {
                 if ($value != $entry->$key) {
                     break;

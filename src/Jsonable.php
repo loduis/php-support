@@ -6,5 +6,5 @@ namespace Php;
 
 interface Jsonable extends \JsonSerializable, \Stringable
 {
-    public function toJson(int $options = 0);
+    public function toJson(int $options = 0): string;
 }
