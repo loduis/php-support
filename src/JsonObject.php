@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Php;
+namespace PHP;
 
 /**
  * @template TKey of array-key

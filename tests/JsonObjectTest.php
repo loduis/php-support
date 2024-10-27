@@ -1,12 +1,12 @@
 <?php
 
-namespace Php\Tests;
+namespace PHP\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Php\JsonObject;
-use Php\Http\Required;
-use Php\Attribute\Transform;
-use Php\Http\JsonTrait;
+use PHP\JsonObject;
+use PHP\Http\Required;
+use PHP\Attribute\Transform;
+use PHP\Http\JsonTrait;
 
 class TestHttp extends JsonObject
 {

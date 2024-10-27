@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Php\Http;
+namespace PHP\Http;
 
-use Php\Attribute\TransformTrait;
+use PHP\Attribute\TransformTrait;
 use ReflectionProperty;
 
 trait JsonTrait

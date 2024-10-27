@@ -1,6 +1,6 @@
 <?php
 
-namespace Php {
+namespace PHP {
     if (!function_exists(__NAMESPACE__ . '\array_reduce')) {
         function array_reduce(array $array, callable $callback, mixed $initial = null): mixed
         {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Php\Http;
+namespace PHP\Http;
 
 #[\Attribute]
 class Required

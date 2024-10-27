@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Php\Http;
+namespace PHP\Http;
 
-use Php\JsonObject as PhpJsonObject;
+use PHP\JsonObject as PhpJsonObject;
 
 /**
  * @template TKey of array-key

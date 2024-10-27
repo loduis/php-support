@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Php\Attribute;
+namespace PHP\Attribute;
 
 use ReflectionProperty;
-use Php\ReflectionCache;
-use function Php\str_camel;
-use function Php\str_snake;
+use PHP\ReflectionCache;
+use function PHP\str_camel;
+use function PHP\str_snake;
 
 trait TransformTrait
 {

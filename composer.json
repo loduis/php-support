@@ -1,5 +1,5 @@
 {
-    "name": "loduis/support",
+    "name": "loduis/php-support",
     "authors": [
         {
             "name": "Loduis Madariaga",
@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Php\\": "src/"
+            "PHP\\": "src/"
         },
         "files": [
             "src/helpers.php"
@@ -24,13 +24,13 @@
     },
     "autoload-dev": {
         "psr-4": {
-          "Php\\": "tests/"
+          "PHP\\": "tests/"
         }
     },
     "minimum-stability": "dev",
     "extra": {
         "branch-alias": {
-            "dev-main": "2.x-dev"
+            "dev-main": "3.x-dev"
         }
     }
 }

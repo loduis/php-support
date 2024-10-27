@@ -1,15 +1,15 @@
 <?php
 
-namespace Php\Tests;
+namespace PHP\Tests;
 
 use LogicException;
 use PHPUnit\Framework\TestCase;
-use Php\FluentObject;
+use PHP\FluentObject;
 use OutOfBoundsException;
 use ReflectionProperty;
 use stdClass;
-use Php\Attribute\Transform;
-use Php\Attribute\TransformTrait;
+use PHP\Attribute\Transform;
+use PHP\Attribute\TransformTrait;
 
 /**
  * @property TestObject2 $nestedObject

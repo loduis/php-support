@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Php\Attribute;
+namespace PHP\Attribute;
 
 #[\Attribute]
 class Transform
